@@ -1,0 +1,9 @@
+.venv/
+.env
+orders.db
+__pycache__/
+*.pyc
+.DS_Store
+hello_world_flask
+LEARNING_PLAN.md
+progress.md

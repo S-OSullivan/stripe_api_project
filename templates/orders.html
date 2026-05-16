@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Orders</title>
+  </head>
+  <body>
+    <h1>Orders</h1>
+
+    {% if orders %}
+      <table border="1" cellpadding="8">
+        <tr>
+          <th>ID</th>
+          <th>Product</th>
+          <th>Amount</th>
+          <th>Currency</th>
+          <th>Status</th>
+          <th>Stripe Session ID</th>
+          <th>Stripe PaymentIntent ID</th>
+          <th>Created At</th>
+        </tr>
+
+        {% for order in orders %}
+          <tr>
+            <td>{{ order["id"] }}</td>
+            <td>{{ order["product_name"] }}</td>
+            <td>{{ order["amount"] }}</td>
+            <td>{{ order["currency"] }}</td>
+            <td>{{ order["status"] }}</td>
+            <td>{{ order["stripe_session_id"] }}</td>
+            <td>{{ order["stripe_payment_intent_id"] }}</td>
+            <td>{{ order["created_at"] }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>No orders yet.</p>
+    {% endif %}
+
+    <p><a href="/">Back home</a></p>
+  </body>
+</html>
