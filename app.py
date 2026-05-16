@@ -68,6 +68,21 @@ def mark_order_paid_by_session(stripe_session_id):
     conn.commit()
     conn.close()
 
+def update_payment_intent_by_session(stripe_session_id, stripe_payment_intent_id):
+    conn = get_db_connection()
+
+    conn.execute(
+        """
+        UPDATE orders
+        SET stripe_payment_intent_id = ?
+        WHERE stripe_session_id = ?
+        """,
+        (stripe_payment_intent_id, stripe_session_id)
+    )
+
+    conn.commit()
+    conn.close()
+
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 @app.route("/", methods=["GET", "POST"])
@@ -132,6 +147,36 @@ def orders():
     orders = conn.execute("SELECT * FROM orders ORDER BY id").fetchall()
     conn.close()
     return render_template("orders.html", orders=orders)
+
+@app.route("/webhook", methods=["POST"])
+def stripe_webhook():
+    payload = request.data
+    sig_header = request.headers.get("Stripe-Signature")
+    webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, webhook_secret
+        )
+    except ValueError as e:
+        return "Invalid payload", 400
+    except stripe.error.SignatureVerificationError as e:
+        return "Invalid signature", 400 
+    
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+
+        mark_order_paid_by_session(session.id)
+
+        stripe_session_id = session.id
+        stripe_payment_intent_id = session.payment_intent
+
+        if stripe_payment_intent_id:
+            update_payment_intent_by_session(session.id, stripe_payment_intent_id)
+
+        print(f"Checkout session completed: {session.id}")
+
+    return "Webhook received", 200
 
 if __name__ == "__main__":
     app.run(debug=True)
