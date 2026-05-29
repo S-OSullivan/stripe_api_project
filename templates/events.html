@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Stripe Events</title>
+  </head>
+  <body>
+    <h1>Stripe Webhook Events</h1>
+
+    {% if events %}
+      <table border="1" cellpadding="8">
+        <tr>
+          <th>ID</th>
+          <th>Stripe Event ID</th>
+          <th>Event Type</th>
+          <th>Object ID</th>
+          <th>Processed</th>
+          <th>Error</th>
+          <th>Created At</th>
+        </tr>
+
+        {% for event in events %}
+          <tr>
+            <td>{{ event["id"] }}</td>
+            <td>{{ event["stripe_event_id"] }}</td>
+            <td>{{ event["event_type"] }}</td>
+            <td>{{ event["object_id"] }}</td>
+            <td>
+              {% if event["processed"] == 1 %}
+                Yes
+              {% else %}
+                No
+              {% endif %}
+            </td>
+            <td>{{ event["error"] }}</td>
+            <td>{{ event["created_at"] }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>No events logged yet.</p>
+    {% endif %}
+
+    <p><a href="/">Back home</a></p>
+    <p><a href="/orders">View orders</a></p>
+  </body>
+</html>

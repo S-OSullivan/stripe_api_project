@@ -15,6 +15,18 @@ CREATE TABLE IF NOT EXISTS orders (
 )
 """)
 
+conn.execute("""
+CREATE TABLE IF NOT EXISTS stripe_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    stripe_event_id TEXT UNIQUE NOT NULL,
+    event_type TEXT NOT NULL,
+    object_id TEXT,
+    processed INTEGER NOT NULL DEFAULT 0,
+    error TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+
 conn.commit()
 conn.close()
 
