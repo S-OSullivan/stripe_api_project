@@ -92,7 +92,7 @@ def event_already_processed(stripe_event_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT id FROM stripe_events WHERE stripe_event_id = ?
+        SELECT id FROM stripe_events WHERE stripe_event_id = ? AND processed = 1
     """, (stripe_event_id,))
     event = cursor.fetchone()
     conn.close()
@@ -103,7 +103,7 @@ def save_event(stripe_event_id, event_type, object_id, error=None):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO stripe_events (
+        INSERT OR IGNORE INTO stripe_events (
             stripe_event_id, 
             event_type,
             object_id, 
