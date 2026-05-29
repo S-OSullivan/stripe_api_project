@@ -148,6 +148,29 @@ def mark_event_failed(stripe_event_id, error_message):
     conn.commit()
     conn.close()
 
+def extract_metadata(metadata):
+    if not metadata:
+        return {}
+
+    keys = [
+        "order_id",
+        "product_name",
+        "integration_source"
+    ]
+
+    extracted = {}
+
+    for key in keys:
+        try:
+            value = metadata[key]
+        except Exception:
+            value = getattr(metadata, key, None)
+
+        if value:
+            extracted[key] = value
+
+    return extracted
+
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 # The home route serves the main page where users can initiate the checkout process. 
@@ -179,12 +202,14 @@ def home():
             success_url = url_for("success", _external=True) + "?session_id={CHECKOUT_SESSION_ID}",
             cancel_url = url_for("cancel", _external=True),
             metadata = {
-                "order_id": str(order_id)
+                "order_id": str(order_id),
+                "integration_source": "stripe_ic_lab"
             },
             payment_intent_data={
                 "metadata": {
                     "order_id": str(order_id),
-                    "product_name": "Baby Cardigan"
+                    "product_name": "Baby Cardigan",
+                    "integration_source": "stripe_ic_lab"
                 }
             }
         )
@@ -290,6 +315,35 @@ def stripe_webhook():
         return "Webhook processing failed", 500
 
     return "Success", 200
+
+@app.route("/debug/session/<stripe_session_id>")
+def debug_session(stripe_session_id):
+    try:
+        session = stripe.checkout.Session.retrieve(
+            stripe_session_id,
+            expand=["payment_intent"]
+        )
+
+        session_metadata = extract_metadata(session.metadata)
+
+        payment_intent = session.payment_intent
+
+        if payment_intent:
+            payment_intent_metadata = extract_metadata(payment_intent.metadata)
+        else:
+            payment_intent_metadata = {}
+
+        return render_template(
+            "debug_session.html",
+            session=session,
+            session_metadata=session_metadata,
+            payment_intent=payment_intent,
+            payment_intent_metadata=payment_intent_metadata
+        )
+
+    except Exception as e:
+        print(f"Debug session error: {repr(e)}")
+        return f"Error retrieving Checkout Session: {repr(e)}", 500
 
 if __name__ == "__main__":
     app.run(debug=True)

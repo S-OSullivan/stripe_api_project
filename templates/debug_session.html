@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Debug Checkout Session</title>
+  </head>
+  <body>
+    <h1>Debug Checkout Session</h1>
+
+    <h2>Checkout Session</h2>
+    <p><strong>ID:</strong> {{ session.id }}</p>
+    <p><strong>Payment Status:</strong> {{ session.payment_status }}</p>
+    <p><strong>Amount Total:</strong> {{ session.amount_total }}</p>
+    <p><strong>Currency:</strong> {{ session.currency }}</p>
+
+    <h3>Session Metadata</h3>
+    {% if session_metadata %}
+      <ul>
+        {% for key, value in session_metadata.items() %}
+          <li><strong>{{ key }}:</strong> {{ value }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No metadata found.</p>
+    {% endif %}
+
+    <h2>PaymentIntent</h2>
+
+    {% if payment_intent %}
+      <p><strong>ID:</strong> {{ payment_intent.id }}</p>
+      <p><strong>Status:</strong> {{ payment_intent.status }}</p>
+      <p><strong>Amount:</strong> {{ payment_intent.amount }}</p>
+      <p><strong>Currency:</strong> {{ payment_intent.currency }}</p>
+
+      <h3>PaymentIntent Metadata</h3>
+      {% if payment_intent_metadata %}
+        <ul>
+          {% for key, value in payment_intent_metadata.items() %}
+            <li><strong>{{ key }}:</strong> {{ value }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No PaymentIntent metadata found.</p>
+      {% endif %}
+    {% else %}
+      <p>No PaymentIntent found on this session.</p>
+    {% endif %}
+
+    <p><a href="/orders">Back to orders</a></p>
+    <p><a href="/events">Back to events</a></p>
+  </body>
+</html>
