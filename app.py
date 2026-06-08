@@ -344,6 +344,28 @@ def debug_session(stripe_session_id):
     except Exception as e:
         print(f"Debug session error: {repr(e)}")
         return f"Error retrieving Checkout Session: {repr(e)}", 500
+    
+@app.route("/debug/payment-intents")
+def debug_payment_intents():
+    starting_after = request.args.get("starting_after")
+
+    params = {
+        "limit": 10
+    }
+
+    if starting_after:
+        params["starting_after"] = starting_after
+
+    try:
+        payment_intents = stripe.PaymentIntent.list(**params)
+
+        return render_template(
+            "debug_payment_intents.html",
+            payment_intents=payment_intents
+        )
+
+    except Exception as e:
+        return f"Error retrieving PaymentIntents: {repr(e)}", 500
 
 if __name__ == "__main__":
     app.run(debug=True)

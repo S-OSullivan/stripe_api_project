@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Debug PaymentIntents</title>
+  </head>
+  <body>
+    <h1>Recent PaymentIntents</h1>
+
+    <p>
+      This page lists recent Stripe PaymentIntents using cursor-based pagination.
+    </p>
+
+    {% if payment_intents.data %}
+      <table border="1" cellpadding="8">
+        <tr>
+          <th>ID</th>
+          <th>Amount</th>
+          <th>Currency</th>
+          <th>Status</th>
+          <th>Created</th>
+        </tr>
+
+        {% for pi in payment_intents.data %}
+          <tr>
+            <td>{{ pi.id }}</td>
+            <td>{{ pi.amount }}</td>
+            <td>{{ pi.currency }}</td>
+            <td>{{ pi.status }}</td>
+            <td>{{ pi.created }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <p><strong>Has more:</strong> {{ payment_intents.has_more }}</p>
+
+      {% if payment_intents.has_more %}
+        {% set last_pi = payment_intents.data[-1] %}
+        <p>
+          <a href="/debug/payment-intents?starting_after={{ last_pi.id }}">
+            Next page
+          </a>
+        </p>
+      {% endif %}
+
+    {% else %}
+      <p>No PaymentIntents found.</p>
+    {% endif %}
+
+    <p><a href="/">Back home</a></p>
+    <p><a href="/orders">View orders</a></p>
+    <p><a href="/events">View events</a></p>
+  </body>
+</html>
